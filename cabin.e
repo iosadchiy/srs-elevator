@@ -12,7 +12,7 @@ creation
 
 feature {ELEVATOR}
 
-	TOTAL_FLOORS : INTEGER -- total floors
+	totalFloors : INTEGER -- total floors
 
 	curFloor : INTEGER 		-- current floor
 
@@ -22,19 +22,60 @@ feature {ELEVATOR}
 
 	buttons : ARRAY[BUTTON] -- buttons
 
+feature
+
 	make (floors : INTEGER)
 		require
 			floors > 1
 		do
-			TOTAL_FLOORS := floors
+			totalFloors := floors
 			curFloor := 0
 			doorIsOpen := true
 			direction :=0
-			create buttons.make (0, TOTAL_FLOORS-1)
+			create buttons.make (0, totalFloors-1)
+		end
+
+
+feature
+
+	getPosition() : INTEGER
+	do
+		Result := curFloor
+	end
+
+	isMoving() : BOOLEAN
+		do
+			Result := false
+		end
+
+	moveUp()
+		require
+			floorInRange: curFloor < totalFloors - 1
+			doorIsClosed: not doorIsOpen
+		do
+			curFloor := curFloor + 1
+		end
+
+	moveDown()
+		require
+			floorInRange: curFloor > 0
+			doorIsClosed: not doorIsOpen
+		do
+			curFloor := curFloor - 1
+		end
+
+	openDoor()
+		do
+			doorIsOpen := true
+		end
+
+	closeDoor()
+		do
+			doorIsOpen := false
 		end
 
 invariant
 	-1 <= direction  and direction <=1
-	0 <= curFloor and curFloor < TOTAL_FLOORS
+	0 <= curFloor and curFloor < totalFloors
 
 end

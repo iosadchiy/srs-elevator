@@ -7,4 +7,17 @@ note
 class
 	FLOOR
 
+create
+	make
+
+feature
+
+	upButton: BUTTON
+	downButton: BUTTON
+
+feature
+	make()
+		do
+		end
+
 end

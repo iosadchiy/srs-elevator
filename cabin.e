@@ -1,8 +1,6 @@
 note
 	description: "Summary description for {CABIN}."
-	author: ""
-	date: "$Date$"
-	revision: "$Revision$"
+	model: cur_floor, max_floor, min_floor, door_is_open, is_moved
 
 class
 	CABIN
@@ -10,72 +8,125 @@ class
 creation
 	make
 
-feature {ELEVATOR}
+feature {NONE} -- create
 
-	totalFloors : INTEGER -- total floors
+	make (a_min_floor, a_max_floor : INTEGER)
+		note
+			status: creator
+		require
+			number_is_ok: 	a_min_floor >= 0
+			number_is_ok_2: a_max_floor > a_min_floor
+		do
+			max_floor := a_max_floor
+			min_floor := a_min_floor
+			cur_floor := min_floor
+			door_is_open := true
+			is_moved := false
+		ensure
+			cur_floor_is_ok: 	cur_floor = min_floor
+			max_floor_is_ok: max_floor = a_max_floor
+			min_floor_is_ok: min_floor = a_min_floor
+			not_moved: is_moved = false
+			door_is_open: door_is_open = true
+		end
 
-	curFloor : INTEGER 		-- current floor
 
-	doorIsOpen : BOOLEAN 	-- is doorOpened
+feature -- access
+	max_floor : INTEGER -- max_floor index
 
-	direction : INTEGER		-- 1 = cabin should move up, -1= cabin should move down, 0= cabin has no pressed buttons
+	min_floor : INTEGER -- min_floor index
 
-	buttons : ARRAY[BUTTON] -- buttons
+	cur_floor : INTEGER 		-- current floor
+
+	door_is_open : BOOLEAN 	-- is doorOpened
+
+	is_moved : BOOLEAN --
+
+
+
 
 feature
 
-	make (floors : INTEGER)
+	stop
+
 		require
-			floors > 1
+			modify_field (["is_moved","closed"], Current)
 		do
-			totalFloors := floors
-			curFloor := 0
-			doorIsOpen := true
-			direction :=0
-			create buttons.make (0, totalFloors-1)
+			is_moved := false
+		ensure
+			is_moved_false: is_moved = false
 		end
 
-
-feature
-
-	getPosition() : INTEGER
-	do
-		Result := curFloor
-	end
-
-	isMoving() : BOOLEAN
-		do
-			Result := false
-		end
-
-	moveUp()
+	close_door
 		require
-			floorInRange: curFloor < totalFloors - 1
-			doorIsClosed: not doorIsOpen
+			modify_field (["door_is_open","closed"], Current)
+			cabin_is_stopped: is_moved = false
 		do
-			curFloor := curFloor + 1
+			door_is_open := false
+		ensure
+			door_is_open_false: door_is_open = false
 		end
 
-	moveDown()
+	open_door
 		require
-			floorInRange: curFloor > 0
-			doorIsClosed: not doorIsOpen
+			modify_field (["door_is_open","closed"], Current)
+			cabin_is_stopped: is_moved = false
 		do
-			curFloor := curFloor - 1
+			door_is_open := true
+		ensure
+			door_is_open: door_is_open = true
 		end
 
-	openDoor()
+
+	move_up
+		require
+			modify_field (["cur_floor", "is_moved","closed"], Current)
+			cabin_can_move_up: cabin_can_move_up
 		do
-			doorIsOpen := true
+			cur_floor := cur_floor + 1
+			is_moved := true
+		ensure
+			floorIsNext:		 cur_floor = old cur_floor + 1
+			is_moving	:		is_moved = true
 		end
 
-	closeDoor()
+	move_down
+		require
+			modify_field (["cur_floor", "is_moved", "closed"], Current)
+			cabin_can_move_down: cabin_can_move_down
 		do
-			doorIsOpen := false
+			cur_floor := cur_floor - 1
+			is_moved := true
+		ensure
+			floorIsNext:		 cur_floor = old cur_floor - 1
+			is_moving	:		is_moved = true
 		end
+
+	cabin_can_move_up  : BOOLEAN
+		note
+			status: functional
+		do
+			Result :=
+					cur_floor < max_floor
+			 	and	cur_floor >= min_floor
+			    and	door_is_open = false
+		end
+
+	cabin_can_move_down : BOOLEAN
+		note
+			status: functional
+		do
+			Result :=
+					cur_floor <= max_floor
+			 	and	cur_floor > min_floor
+			    and	door_is_open = false
+		end
+
 
 invariant
-	-1 <= direction  and direction <=1
-	0 <= curFloor and curFloor < totalFloors
 
+	border_bottom: min_floor <= cur_floor;
+	border_up: cur_floor <= max_floor;
+	min_max_is_ok_1: min_floor >= 0
+	min_max_is_ok_2: max_floor > min_floor
 end

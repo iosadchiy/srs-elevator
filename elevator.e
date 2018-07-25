@@ -119,6 +119,7 @@ feature
 		do
 			cabin_buttons := set_after_push(cabin_buttons, button)
 		ensure
+			-- F1
 			def: cabin_buttons = set_after_push(old cabin_buttons, button)
 		end
 
@@ -129,6 +130,7 @@ feature
 		do
 			floor_up_buttons := set_after_push(floor_up_buttons, button)
 		ensure
+			-- F1
 			def: floor_up_buttons = set_after_push(old floor_up_buttons, button)
 		end
 
@@ -139,6 +141,7 @@ feature
 		do
 			floor_down_buttons := set_after_push(floor_down_buttons, button)
 		ensure
+			-- F1
 			def: floor_down_buttons = set_after_push(old floor_down_buttons, button)
 		end
 
@@ -188,6 +191,7 @@ feature -- INTERFACE  : MAIN OPERATION FUNCTION
 		ensure
 
 	-- ensure from drop_buttons	
+	-- F1
 			floor_up_buttons: checking.result_release_button_check (((old is_door_open and not (old is_moving) or old have_to_stop_and_open_door)
 																					 and  (old destination_up or old no_destination)) ,
 																		floor_up_buttons, old floor_up_buttons,  old cur_floor)
@@ -218,6 +222,7 @@ feature -- INTERFACE  : MAIN OPERATION FUNCTION
 							implies (is_moving = old is_moving   and is_door_open = old is_door_open   and  cur_floor = old cur_floor )
 
 	--destination
+	-- F3
 		dest_floor:	destination_floor = checking.get_the_destination (cabin_buttons, floor_up_buttons, floor_down_buttons,
 																 cur_floor, old destination_floor,
 																old destination_up, old destination_down)
@@ -447,17 +452,20 @@ invariant
 	min_max_is_ok_1: min_floor > {ELEVATOR}.null
 	min_max_is_ok_2: max_floor > min_floor
 
+	-- C1: Stay within range
 	cur_floor_is_ok1: min_floor <= cur_floor
 	cur_floor_is_ok2: cur_floor <= max_floor
 
 	owns_definition: owns = [checking]
 
+	-- C2: Don’t move with door open
 	reverse_door_and_moving:	is_moving = not is_door_open
 
 	destination_in_range1 : min_floor <= destination_floor or destination_floor = {ELEVATOR}.null
 
 	destination_in_range2 : destination_floor<= max_floor
 
+	-- F1: Indicators, C3: Optimize
 	destination_in_buttons : destination_floor = {ELEVATOR}.null or cabin_buttons.has (destination_floor) or
 								floor_up_buttons.has (destination_floor) or floor_down_buttons.has (destination_floor) or
 								destination_floor = cur_floor
